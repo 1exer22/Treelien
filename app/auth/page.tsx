@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link, Eye, EyeOff } from "lucide-react";
+import { Link, Eye, EyeOff, Mail } from "lucide-react";
 import { useSupabase } from "@/components/providers";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -20,6 +20,9 @@ import { toast } from "sonner";
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetEmailSent, setResetEmailSent] = useState(false);
   const { supabase } = useSupabase();
   const router = useRouter();
 
@@ -85,17 +88,151 @@ export default function AuthPage() {
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail) {
+      toast.error("Veuillez entrer votre adresse email");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth?reset=true`,
+      });
+
+      if (error) {
+        toast.error("Erreur : " + error.message);
+      } else {
+        setResetEmailSent(true);
+        toast.success(
+          "Email de réinitialisation envoyé ! Vérifiez votre boîte mail."
+        );
+      }
+    } catch (error) {
+      console.error("Reset password error:", error);
+      toast.error("Une erreur est survenue. Veuillez réessayer.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetToSignIn = () => {
+    setShowResetPassword(false);
+    setResetEmail("");
+    setResetEmailSent(false);
+  };
+
+  if (showResetPassword) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center space-x-2 mb-4">
+              <img 
+                src="/images/treelien-logo.png" 
+                alt="TreeLien" 
+                className="h-8 w-8" 
+              />
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                TreeLien
+              </span>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {resetEmailSent
+                ? "Email envoyé !"
+                : "Réinitialiser le mot de passe"}
+            </h1>
+            <p className="text-gray-600 mt-2">
+              {resetEmailSent
+                ? "Vérifiez votre boîte mail et suivez les instructions pour réinitialiser votre mot de passe."
+                : "Entrez votre adresse email pour recevoir un lien de réinitialisation"}
+            </p>
+          </div>
+
+          <Card>
+            <CardContent className="p-6">
+              {resetEmailSent ? (
+                <div className="space-y-4">
+                  <div className="text-center p-6">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+                      <Mail className="w-8 h-8 text-green-600" />
+                    </div>
+                    <p className="text-gray-600 mb-4">
+                      Un email a été envoyé à <strong>{resetEmail}</strong>
+                    </p>
+                    <p className="text-sm text-gray-500 mb-6">
+                      Si vous ne recevez pas l'email dans quelques minutes,
+                      vérifiez votre dossier spam.
+                    </p>
+                  </div>
+                  <Button
+                    onClick={resetToSignIn}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Retour à la connexion
+                  </Button>
+                </div>
+              ) : (
+                <form onSubmit={handleResetPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reset-email">Adresse email</Label>
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      placeholder="votre@email.com"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <Button
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      disabled={isLoading}
+                    >
+                      {isLoading
+                        ? "Envoi en cours..."
+                        : "Envoyer le lien de réinitialisation"}
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={resetToSignIn}
+                      variant="outline"
+                      className="w-full"
+                      disabled={isLoading}
+                    >
+                      Retour à la connexion
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <Link className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              TreeLien
-            </span>
-          </div>
+                  <div className="text-center mb-8">
+            <div className="flex items-center justify-center space-x-2 mb-4">
+              <img 
+                src="/images/treelien-logo.png" 
+                alt="TreeLien" 
+                className="h-8 w-8" 
+              />
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                TreeLien
+              </span>
+            </div>
           <h1 className="text-2xl font-bold text-gray-900">Bienvenue</h1>
           <p className="text-gray-600 mt-2">
             Connectez-vous à votre compte ou créez-en un nouveau
@@ -170,6 +307,16 @@ export default function AuthPage() {
                     {isLoading ? "Connexion..." : "Se connecter"}
                   </Button>
                 </form>
+
+                <div className="text-center mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowResetPassword(true)}
+                    className="text-sm text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Mot de passe oublié ?
+                  </button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

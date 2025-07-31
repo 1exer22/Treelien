@@ -10,6 +10,11 @@ export const metadata: Metadata = {
   title: "TreeLien - Créez votre arbre de liens parfait",
   description:
     "Créez une page link-in-bio magnifique qui connecte votre audience à tout votre contenu. Simple, puissant, et entièrement personnalisable.",
+  icons: {
+    icon: "/images/treelien-logo.png",
+    shortcut: "/images/treelien-logo.png",
+    apple: "/images/treelien-logo.png",
+  },
   keywords: [
     "link in bio",
     "treelien",

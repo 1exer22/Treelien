@@ -1,10 +1,20 @@
-'use client';
+"use client";
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Settings, GripVertical, ExternalLink } from 'lucide-react';
-import { Link, Instagram, Twitter, Youtube, Github, Globe, Mail, Phone, MapPin } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Settings, GripVertical, ExternalLink } from "lucide-react";
+import {
+  Link,
+  Instagram,
+  Twitter,
+  Youtube,
+  Github,
+  Globe,
+  Mail,
+  Phone,
+  MapPin,
+} from "lucide-react";
 
 interface LinkItem {
   id: string;
@@ -19,6 +29,7 @@ interface LinkItem {
 interface LinkCardProps {
   link: LinkItem;
   onEdit: (link: LinkItem) => void;
+  showClicks?: boolean;
 }
 
 const iconMap = {
@@ -33,11 +44,11 @@ const iconMap = {
   map: MapPin,
 };
 
-export function LinkCard({ link, onEdit }: LinkCardProps) {
+export function LinkCard({ link, onEdit, showClicks = false }: LinkCardProps) {
   const IconComponent = iconMap[link.icon as keyof typeof iconMap] || Link;
 
   const handleVisit = () => {
-    window.open(link.url, '_blank');
+    window.open(link.url, "_blank");
   };
 
   return (
@@ -52,20 +63,26 @@ export function LinkCard({ link, onEdit }: LinkCardProps) {
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-gray-900">{link.title}</h3>
-            <p className="text-gray-600 text-sm truncate max-w-xs">{link.url}</p>
+            <p className="text-gray-600 text-sm truncate max-w-xs">
+              {link.url}
+            </p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-4">
-          <div className="text-center">
-            <div className="text-lg font-semibold text-gray-900">{link.click_count}</div>
-            <div className="text-sm text-gray-600">clics</div>
-          </div>
-          
+          {showClicks && (
+            <div className="text-center">
+              <div className="text-lg font-semibold text-gray-900">
+                {link.click_count}
+              </div>
+              <div className="text-sm text-gray-600">clics</div>
+            </div>
+          )}
+
           <Badge variant={link.is_active ? "default" : "secondary"}>
             {link.is_active ? "Actif" : "Inactif"}
           </Badge>
-          
+
           <div className="flex space-x-2">
             <Button variant="ghost" size="sm" onClick={handleVisit}>
               <ExternalLink className="h-4 w-4" />
